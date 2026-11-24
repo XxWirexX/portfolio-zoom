@@ -1,11 +1,8 @@
-# Conteneur de démo : il répond sur le port choisi à la création (3000),
-# pour vérifier que la route https://wireredblue.xyz fonctionne.
-# Remplace-le par ton application (voir README.md), puis push : la CD redéploie.
+# Le site est construit depuis le Dockerfile (Vite → nginx, port 3000).
+# Push sur main : la CD reconstruit et relance le conteneur.
 services:
   app:
-    image: traefik/whoami
-    command: ["--port", "3000"]
-    # build: .    <- avec ton propre Dockerfile, à la place des deux lignes du dessus
+    build: .
     container_name: portfolio-zoom
     restart: unless-stopped
     env_file:

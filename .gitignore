@@ -1,2 +1,5 @@
+# Variables de l'application (le .env du serveur n'est jamais commité)
 .env
 .DS_Store
+node_modules
+dist
