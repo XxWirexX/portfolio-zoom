@@ -1,0 +1,19 @@
+# Conteneur de démo : il répond sur le port choisi à la création (3000),
+# pour vérifier que la route https://wireredblue.xyz fonctionne.
+# Remplace-le par ton application (voir README.md), puis push : la CD redéploie.
+services:
+  app:
+    image: traefik/whoami
+    command: ["--port", "3000"]
+    # build: .    <- avec ton propre Dockerfile, à la place des deux lignes du dessus
+    container_name: portfolio-zoom
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
