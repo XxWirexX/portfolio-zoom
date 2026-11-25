@@ -12,6 +12,13 @@ export class Camera {
   private lastInput = 0;
   private snapDelay = 650;
   private auto: { to: number } | null = null;
+  /**
+   * Pas de retour avant l'espace : la boucle n'existe que vers l'avant, pour ne
+   * pas « spoiler » la fin et ne pas donner l'impression de partir à l'envers.
+   */
+  min = 0;
+  /** Appelé quand on essaie de reculer avant le début. */
+  onBlocked?: () => void;
 
   constructor(start = 0) {
     this.t = start;
@@ -22,6 +29,10 @@ export class Camera {
   nudge(dt: number): void {
     this.auto = null;
     this.target += dt;
+    if (this.target < this.min) {
+      if (dt < 0 && this.target - dt <= this.min + 0.02) this.onBlocked?.();
+      this.target = this.min;
+    }
     // On évite de « sauter » trois niveaux d'un coup de molette.
     const max = 1.6;
     this.target = Math.min(this.t + max, Math.max(this.t - max, this.target));
@@ -30,6 +41,10 @@ export class Camera {
 
   /** Aller au niveau entier `to` (navigation, clavier). */
   goTo(to: number): void {
+    if (to < this.min) {
+      this.onBlocked?.();
+      to = this.min;
+    }
     this.auto = { to };
     this.target = to;
     this.lastInput = performance.now();
@@ -84,7 +99,8 @@ export function bindInput(el: HTMLElement, cam: Camera, h: InputHandlers, levelC
       firstInput();
       const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 600 : 1;
       const dy = Math.max(-240, Math.min(240, e.deltaY * unit));
-      cam.nudge(dy * 0.0019);
+      // Molette vers le haut = zoomer (comme sur une carte), à l'inverse d'une page.
+      cam.nudge(-dy * 0.0019);
     },
     { passive: false },
   );
@@ -126,8 +142,8 @@ export function bindInput(el: HTMLElement, cam: Camera, h: InputHandlers, levelC
     if (downAt && !dragged && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 8) dragged = true;
     if (dragged) {
       firstInput();
-      // Glisser vers le haut = plonger (comme faire défiler une page).
-      cam.nudge(-(e.clientY - prev.y) * 0.0042);
+      // Même sens que la molette : tirer vers le bas = plonger.
+      cam.nudge((e.clientY - prev.y) * 0.0042);
     }
   });
 
@@ -147,8 +163,8 @@ export function bindInput(el: HTMLElement, cam: Camera, h: InputHandlers, levelC
   window.addEventListener('keydown', (e) => {
     const tgt = e.target as HTMLElement;
     if (tgt && (tgt.closest('dialog[open]') || tgt.isContentEditable)) return;
-    const next = ['ArrowDown', 'PageDown', ' ', 'ArrowRight'];
-    const prev = ['ArrowUp', 'PageUp', 'ArrowLeft'];
+    const next = ['ArrowUp', 'PageUp', ' ', 'ArrowRight'];
+    const prev = ['ArrowDown', 'PageDown', 'ArrowLeft'];
     if (next.includes(e.key)) {
       e.preventDefault();
       firstInput();

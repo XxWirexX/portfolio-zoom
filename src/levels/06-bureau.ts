@@ -4,11 +4,13 @@
  * est le portail.
  */
 import type { Level } from '../engine/types';
-import { C, fillRR, glow, inView, rgba, rng, text, FONT } from '../engine/util';
+import { C, fillRR, glow, inView, rgba, rng, rr, text, FONT } from '../engine/util';
 
-const S = 0.2;
-const PX = 1.11;
-const PY = 0.47;
+// Le widget « projets » posé sur le bureau : son aperçu est le portail.
+const WG = { x: 0.71, y: 0.05, w: 0.85, h: 0.81 };
+const S = 0.375 / 1.6;
+const PX = WG.x + WG.w / 2;
+const PY = 0.4;
 const PW = 1.6 * S;
 const PH = 0.9 * S;
 
@@ -126,7 +128,7 @@ export const bureau: Level = {
   key: 'bureau',
   portal: { x: PX, y: PY, s: S },
   clip(ctx) {
-    ctx.rect(PX - PW, PY - PH, PW * 2, PH * 2);
+    rr(ctx, PX - PW, PY - PH, PW * 2, PH * 2, 0.022);
   },
   draw(d) {
     const { ctx, time, px, view } = d;
@@ -256,7 +258,7 @@ export const bureau: Level = {
       // ---- Gestionnaire de fichiers ----
       const fx = -0.47;
       const fy = 0.05;
-      const fw = 2.03;
+      const fw = 1.13;
       const fh = 0.81;
       windowFrame(ctx, fx, fy, fw, fh, 'fichiers — ~/projets', false, px);
       ctx.fillStyle = 'rgba(255,255,255,0.035)';
@@ -268,22 +270,52 @@ export const bureau: Level = {
         text(ctx, s, fx + 0.05, y, 0.024, s === 'Projets' ? '#ffffff' : 'rgba(220,226,255,0.6)', { font: MONO });
       });
       FOLDERS.forEach((f, i) => {
-        const x = fx + 0.42 + (i % 3) * 0.3;
-        const y = fy + 0.14 + Math.floor(i / 3) * 0.3;
+        const x = fx + 0.46 + (i % 3) * 0.26;
+        const y = fy + 0.16 + Math.floor(i / 3) * 0.32;
         const col = f === 'vps-infra' ? C.blue : f === 'portfolio-zoom' ? C.red : '#8a93c4';
         fillRR(ctx, x - 0.08, y - 0.03, 0.08, 0.03, 0.008, rgba(col, 0.9));
         fillRR(ctx, x - 0.08, y - 0.015, 0.16, 0.12, 0.012, col);
-        text(ctx, f, x, y + 0.16, 0.019, '#d9ddf5', { align: 'center', font: MONO, maxW: 0.28 });
+        text(ctx, f, x, y + 0.16, 0.019, '#d9ddf5', { align: 'center', font: MONO, maxW: 0.24 });
       });
-      // Volet d'aperçu = portail
-      text(ctx, 'aperçu', PX - PW, PY - PH - 0.03, 0.022, 'rgba(220,226,255,0.6)', { font: MONO });
-      ctx.fillStyle = '#0e1118';
-      ctx.fillRect(PX - PW, PY - PH, PW * 2, PH * 2);
+
+      // ---- Widget « projets » (le portail vit dedans) ----
+      const hov = d.isHover('__next');
+      glow(ctx, PX, PY + 0.1, 0.7, hov ? C.blue : '#6b5bff', hov ? 0.22 : 0.12);
+      fillRR(ctx, WG.x + 0.012, WG.y + 0.02, WG.w, WG.h, 0.04, 'rgba(0,0,0,0.35)');
+      fillRR(ctx, WG.x, WG.y, WG.w, WG.h, 0.04, 'rgba(16,18,32,0.82)');
+      {
+        const g = ctx.createLinearGradient(WG.x, WG.y, WG.x + WG.w, WG.y + WG.h);
+        g.addColorStop(0, rgba(C.red, 0.9));
+        g.addColorStop(1, rgba(C.blue, 0.9));
+        ctx.strokeStyle = g;
+        ctx.lineWidth = Math.max(1.5 / px, 0.004);
+        ctx.beginPath();
+        rr(ctx, WG.x, WG.y, WG.w, WG.h, 0.04);
+        ctx.stroke();
+      }
+      // en-tête
+      fillRR(ctx, WG.x + 0.04, WG.y + 0.045, 0.05, 0.016, 0.005, rgba(C.red, 0.9));
+      fillRR(ctx, WG.x + 0.04, WG.y + 0.055, 0.075, 0.05, 0.01, C.red);
+      text(ctx, 'projets', WG.x + 0.14, WG.y + 0.095, 0.034, '#ffffff', { weight: 700 });
+      const live = 0.6 + 0.4 * Math.sin(time * 3);
+      glow(ctx, WG.x + WG.w - 0.06, WG.y + 0.08, 0.03, '#3dd68c', live);
+      text(ctx, 'live', WG.x + WG.w - 0.09, WG.y + 0.088, 0.018, 'rgba(220,226,255,0.6)', { font: MONO, align: 'right' });
+      // aperçu = portail, aux coins arrondis
+      ctx.fillStyle = '#0b0d15';
+      ctx.beginPath();
+      rr(ctx, PX - PW, PY - PH, PW * 2, PH * 2, 0.022);
+      ctx.fill();
       d.portal();
-      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-      ctx.lineWidth = 1 / px;
-      ctx.strokeRect(PX - PW, PY - PH, PW * 2, PH * 2);
-      text(ctx, '~/projets · 8 éléments', PX - PW, PY + PH + 0.045, 0.02, 'rgba(220,226,255,0.5)', { font: MONO });
+      ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+      ctx.lineWidth = Math.max(1 / px, 0.002);
+      ctx.beginPath();
+      rr(ctx, PX - PW, PY - PH, PW * 2, PH * 2, 0.022);
+      ctx.stroke();
+      // pied
+      text(ctx, '8 projets · web, infra, pro', WG.x + 0.04, PY + PH + 0.07, 0.02, 'rgba(220,226,255,0.6)', { font: MONO });
+      fillRR(ctx, WG.x + 0.04, PY + PH + 0.11, WG.w - 0.08, 0.075, 0.0375, hov ? rgba('#ffffff', 0.16) : 'rgba(255,255,255,0.07)');
+      text(ctx, 'Ouvrir  ↑', PX, PY + PH + 0.157, 0.026, '#ffffff', { align: 'center', weight: 600 });
+      d.hot('__next', { kind: 'rect', x: WG.x, y: WG.y, w: WG.w, h: WG.h });
     });
   },
 };

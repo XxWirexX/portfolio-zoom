@@ -44,7 +44,7 @@ export const levels: LevelText[] = [
     nav: 'Espace',
     kicker: '00 · Origine',
     title: 'Kylian Gagnon',
-    body: "Développeur fullstack à Lyon. Ce qui me fait avancer, c'est la curiosité : comprendre comment les choses fonctionnent, puis les construire moi-même. Ce site part de l'espace et finit sur le serveur qui l'héberge. Fais défiler pour plonger.",
+    body: "Développeur fullstack à Lyon. Ce qui me fait avancer, c'est la curiosité : comprendre comment les choses fonctionnent, puis les construire moi-même. Ce site part de l'espace et finit sur le serveur qui l'héberge. Fais défiler vers le haut pour plonger.",
     spots: ['astro'],
   },
   {

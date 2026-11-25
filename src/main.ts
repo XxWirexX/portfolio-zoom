@@ -32,6 +32,15 @@ const fromHash = LEVELS.findIndex((l) => `#${l.key}` === location.hash);
 const start = params.has('t') ? Number(params.get('t')) : Math.max(0, fromHash);
 const cam = new Camera(start);
 
+// Petite bulle quand on essaie de reculer avant l'espace
+const nudge = document.getElementById('nudge')!;
+let nudgeTimer = 0;
+cam.onBlocked = () => {
+  nudge.classList.add('show');
+  clearTimeout(nudgeTimer);
+  nudgeTimer = window.setTimeout(() => nudge.classList.remove('show'), 1800);
+};
+
 // ---------- Interface ----------
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const cap = { box: $('caption'), kicker: $('cap-kicker'), title: $('cap-title'), body: $('cap-body') };
@@ -71,7 +80,7 @@ if (params.has('nohud')) document.querySelectorAll<HTMLElement>('.brand,.top-act
 function travelTo(idx: number) {
   const cur = Math.round(cam.target);
   let delta = mod(idx - cur);
-  if (delta > N / 2) delta -= N;
+  if (delta > N / 2 && cur + delta - N >= 0) delta -= N;
   cam.goTo(cur + delta);
   hideHint();
 }
@@ -199,7 +208,11 @@ bindInput(
     },
     onClick(x, y) {
       const id = renderer.hitTest(x * dpr, y * dpr);
-      if (id) openSpot(id);
+      if (id === '__next') {
+        // zone spéciale : plonger dans le niveau suivant
+        cam.goTo(Math.round(cam.target) + 1);
+        hideHint();
+      } else if (id) openSpot(id);
     },
     onFirstInput: hideHint,
   },
@@ -264,7 +277,7 @@ function updateHud() {
   renderer.hover = hover;
   canvas.classList.toggle('pointer', !!hover);
   if (hover && mouse) {
-    const sp = spots[hover];
+    const sp = hover === '__next' ? { title: 'Plonger dedans', hint: 'clic pour zoomer' } : spots[hover];
     tooltip.innerHTML = `${esc(sp?.title ?? hover)}<small>${esc(sp?.hint ?? '')}</small>`;
     const x = Math.min(mouse.x + 16, window.innerWidth - tooltip.offsetWidth - 8);
     tooltip.style.transform = `translate(${x}px, ${mouse.y + 18}px)`;

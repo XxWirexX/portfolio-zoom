@@ -112,7 +112,8 @@ Astuce : pour qu'un portail rectangulaire tombe juste, donne-lui les proportions
 
 ## Accessibilité
 
-- Navigation au clavier : `↓` / `espace` pour plonger, `↑` pour remonter, `Début` pour revenir à l'espace.
+- Molette vers le haut (ou tirer vers le bas / écarter deux doigts) pour plonger. On ne peut pas reculer avant l'espace : la boucle ne se découvre qu'en avançant.
+- Navigation au clavier : `↑` / `espace` pour plonger, `↓` pour remonter, `Début` pour revenir à l'espace.
 - Le bouton **Version texte** donne tout le contenu sans animation (et permet d'aller à un niveau).
 - `prefers-reduced-motion` : les déplacements sont plus directs.
 
