@@ -395,8 +395,39 @@ export const rue: Level = {
       refl(-0.79, '#ffb45a', 0.22, 0.3);
       refl(0.68, C.blue, blinkA ? 0.25 : 0.1, 0.2);
 
+      // Colonne Morris : les affiches des événements asso
+      {
+        const cx = -1.3;
+        const top = 0.1;
+        const hw = 0.085;
+        const hov = d.isHover('asso');
+        if (hov) glow(ctx, cx, 0.35, 0.35, '#ffffff', 0.18);
+        ctx.fillStyle = '#1d3a2e';
+        ctx.fillRect(cx - hw, top, hw * 2, GROUND - top);
+        ctx.fillStyle = '#152a22';
+        ctx.fillRect(cx - hw - 0.012, GROUND - 0.03, hw * 2 + 0.024, 0.03);
+        ctx.beginPath();
+        ctx.ellipse(cx, top, hw + 0.015, 0.05, 0, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(cx - hw - 0.015, top - 0.005, hw * 2 + 0.03, 0.02);
+        ctx.fillStyle = '#1d3a2e';
+        ctx.beginPath();
+        ctx.arc(cx, top - 0.05, 0.018, 0, Math.PI * 2);
+        ctx.fill();
+        // affiches
+        fillRR(ctx, cx - hw + 0.01, top + 0.04, hw * 2 - 0.02, 0.2, 0.004, '#f2ecdf');
+        fillRR(ctx, cx - hw + 0.02, top + 0.05, hw * 2 - 0.04, 0.1, 0.004, C.red);
+        text(ctx, 'OLYMPIADES', cx, top + 0.11, 0.024, '#ffffff', { align: 'center', weight: 700, maxW: hw * 2 - 0.05 });
+        text(ctx, 'STUDENT CLUB', cx, top + 0.2, 0.016, '#2a2443', { align: 'center', weight: 700, font: FONT.mono });
+        text(ctx, 'LYON 1', cx, top + 0.225, 0.016, '#2a2443', { align: 'center', font: FONT.mono });
+        fillRR(ctx, cx - hw + 0.01, top + 0.26, hw * 2 - 0.02, 0.17, 0.004, C.blue);
+        text(ctx, 'WEF', cx, top + 0.34, 0.05, '#ffffff', { align: 'center', weight: 700 });
+        text(ctx, 'le week-end', cx, top + 0.39, 0.016, '#e8efff', { align: 'center', font: FONT.mono });
+        d.hot('asso', { kind: 'rect', x: cx - hw - 0.02, y: top - 0.08, w: hw * 2 + 0.04, h: GROUND - top + 0.08 });
+      }
+
       // Lampadaires
-      for (const lx of [-1.4, 1.55]) {
+      for (const lx of [-1.66, 1.55]) {
         ctx.fillStyle = '#121120';
         ctx.fillRect(lx - 0.008, -0.1, 0.016, GROUND + 0.1);
         ctx.fillRect(lx - 0.05, -0.12, 0.1, 0.02);

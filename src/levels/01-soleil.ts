@@ -27,7 +27,7 @@ const PLANETS: Planet[] = [
   { rx: 0.2, r: 0.011, color: '#c9b8ab', dark: '#3a302a', speed: 0.5, th0: 2.1 },
   { rx: 0.32, r: 0.019, color: '#f0cf96', dark: '#4a3a22', speed: 0.32, th0: 4.0 },
   { rx: 0.66, r: 0.016, color: '#ff7a4d', dark: '#41170c', speed: 0.18, th0: 3.3 },
-  { rx: 0.94, r: 0.058, color: '#e6c3a0', dark: '#3d2a1d', speed: 0.08, th0: 2.4, bands: true },
+  { id: 'bots', rx: 0.94, r: 0.058, color: '#e6c3a0', dark: '#3d2a1d', speed: 0.08, th0: 2.4, bands: true },
   { id: 'autodidacte', rx: 1.2, r: 0.046, color: '#f1dcaa', dark: '#3e3320', speed: 0.05, th0: 0.4, ring: true },
   { rx: 1.44, r: 0.03, color: '#a8eef0', dark: '#173b3f', speed: 0.035, th0: 3.9 },
   { rx: 1.66, r: 0.029, color: '#6f8dff', dark: '#121c4a', speed: 0.028, th0: 5.3 },

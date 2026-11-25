@@ -240,6 +240,8 @@ export const terre: Level = {
         text(ctx, '45.76°N  4.83°E', LYON_X - 0.34, LYON_Y - 0.085, 0.024, '#b9c7ff', { font: FONT.mono });
         ctx.globalAlpha = 1;
       }
+      // L'étiquette « Lyon » ouvre le cap 2027
+      d.hot('cap', { kind: 'rect', x: LYON_X - 0.36, y: LYON_Y - 0.2, w: 0.3, h: 0.13 });
     });
 
     // Premier plan : un satellite passe

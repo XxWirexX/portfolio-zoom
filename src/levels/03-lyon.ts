@@ -16,8 +16,11 @@ const FOURVIERE = { x: -0.62, y: 0.02 };
 
 const PINS = [
   { id: 'iut', label: 'IUT Lyon 1 · La Doua', x: 0.88, y: -0.66, color: C.blue },
-  { id: 'axopen', label: 'Axopen', x: 0.5, y: 0.1, color: C.red },
+  // 235 cours Lafayette, sur l'axe qui part vers Villeurbanne
+  { id: 'axopen', label: 'Axopen', x: 0.95, y: 0.035, color: C.red },
 ];
+/** Le lycée est à Tarare, hors de la carte : une flèche au bord ouest. */
+const TARARE = { x: -1.2, y: -0.42 };
 
 /** Bulle « vue de la rue » = portail. */
 const BX = 0.18;
@@ -251,6 +254,32 @@ export const lyon: Level = {
         fillRR(ctx, p.x + 0.04, p.y - 0.09, tw + 0.04, 0.05, 0.012, 'rgba(10,12,20,0.82)');
         text(ctx, p.label, p.x + 0.06, p.y - 0.055, 0.032, '#ffffff', { weight: 600 });
         d.hot(p.id, { kind: 'rect', x: p.x - 0.04, y: p.y - 0.11, w: tw + 0.12, h: 0.12 });
+      }
+
+      // Flèche vers Tarare (lycée)
+      {
+        const hov = d.isHover('lycee');
+        const { x, y } = TARARE;
+        ctx.strokeStyle = hov ? '#ffffff' : 'rgba(255,255,255,0.75)';
+        ctx.lineWidth = 0.008;
+        ctx.setLineDash([0.02, 0.014]);
+        ctx.beginPath();
+        ctx.moveTo(x + 0.42, y + 0.1);
+        ctx.lineTo(x + 0.02, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = hov ? '#ffffff' : 'rgba(255,255,255,0.85)';
+        ctx.beginPath();
+        ctx.moveTo(x - 0.03, y - 0.008);
+        ctx.lineTo(x + 0.04, y - 0.035);
+        ctx.lineTo(x + 0.03, y + 0.025);
+        ctx.fill();
+        const label = 'Lycée · Tarare';
+        const tw = textWidth(ctx, label, 0.032, FONT.sans, 600);
+        fillRR(ctx, x - 0.02, y + 0.03, tw + 0.04, 0.05, 0.012, 'rgba(10,12,20,0.82)');
+        text(ctx, label, x, y + 0.065, 0.032, '#ffffff', { weight: 600 });
+        text(ctx, '~40 km', x, y + 0.11, 0.022, 'rgba(220,226,255,0.6)', { font: FONT.mono });
+        d.hot('lycee', { kind: 'rect', x: x - 0.05, y: y - 0.05, w: tw + 0.12, h: 0.18 });
       }
 
       // Bulle « vue de la rue »

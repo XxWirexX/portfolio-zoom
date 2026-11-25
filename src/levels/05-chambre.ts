@@ -4,7 +4,7 @@
  * l'écran principal.
  */
 import type { Level } from '../engine/types';
-import { C, fillRR, glow, rgba, rng, text, FONT } from '../engine/util';
+import { C, fillRR, glow, rgba, rng, text } from '../engine/util';
 
 const S = 0.15;
 const MX = 0;
@@ -112,6 +112,8 @@ export const chambre: Level = {
       ctx.fillStyle = '#3b6bd6';
       ctx.fillRect(0.1, -0.035, 0.03, 0.07);
       ctx.restore();
+      if (d.isHover('espace')) glow(ctx, 1.2, 0.3, 0.35, '#ffffff', 0.15);
+      d.hot('espace', { kind: 'rect', x: 1.05, y: -0.02, w: 0.3, h: FLOOR + 0.02 });
 
       // Affiche planète (gauche)
       fillRR(ctx, -1.42, -0.62, 0.3, 0.4, 0.01, '#0d1030');
@@ -128,7 +130,7 @@ export const chambre: Level = {
       text(ctx, 'COSMOS', -1.27, -0.27, 0.028, '#f5e4bb', { align: 'center', weight: 700, spacing: 0.01 });
 
       // Étagère
-      const shelfHot = d.isHover('etagere');
+      const shelfHot = d.isHover('veille');
       ctx.fillStyle = '#3d2c26';
       ctx.fillRect(-0.97, -0.46, 0.5, 0.02);
       ctx.fillRect(-0.97, -0.22, 0.5, 0.02);
@@ -166,27 +168,33 @@ export const chambre: Level = {
         ctx.restore();
       }
       if (shelfHot) glow(ctx, -0.72, -0.4, 0.3, '#ffffff', 0.12);
-      d.hot('etagere', { kind: 'rect', x: -0.97, y: -0.64, w: 0.5, h: 0.44 });
+      d.hot('veille', { kind: 'rect', x: -0.97, y: -0.64, w: 0.5, h: 0.44 });
 
-      // Affiche BDE
-      ctx.save();
-      ctx.translate(0.62, -0.42);
-      ctx.rotate(0.035);
-      fillRR(ctx, -0.15, -0.2, 0.3, 0.4, 0.008, '#f0ecff');
-      fillRR(ctx, -0.13, -0.18, 0.26, 0.24, 0.006, '#1b1540');
-      ctx.fillStyle = C.red;
-      ctx.beginPath();
-      ctx.arc(-0.03, -0.06, 0.07, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = C.blue;
-      ctx.beginPath();
-      ctx.arc(0.04, -0.09, 0.05, 0, Math.PI * 2);
-      ctx.fill();
-      text(ctx, 'BDE', 0, -0.03, 0.07, '#ffffff', { align: 'center', weight: 700 });
-      text(ctx, 'INFO', 0, 0.12, 0.05, '#1b1540', { align: 'center', weight: 700, spacing: 0.01 });
-      text(ctx, 'IUT LYON 1', 0, 0.165, 0.022, '#5a5480', { align: 'center', font: FONT.mono });
-      ctx.restore();
-      d.hot('affiche', { kind: 'rect', x: 0.46, y: -0.63, w: 0.32, h: 0.42 });
+      // Tableau en liège avec des post-it (décor)
+      fillRR(ctx, 0.47, -0.62, 0.32, 0.38, 0.012, '#6b4a33');
+      fillRR(ctx, 0.485, -0.605, 0.29, 0.35, 0.008, '#a67c52');
+      {
+        const notes: [number, number, string, number][] = [
+          [0.51, -0.58, '#ffe27a', -0.06],
+          [0.62, -0.57, '#ff9fb0', 0.05],
+          [0.52, -0.44, '#9fd0ff', 0.04],
+          [0.64, -0.43, '#b6f0a8', -0.05],
+        ];
+        for (const [x, y, c, r] of notes) {
+          ctx.save();
+          ctx.translate(x + 0.05, y + 0.05);
+          ctx.rotate(r);
+          ctx.fillStyle = c;
+          ctx.fillRect(-0.05, -0.05, 0.1, 0.1);
+          ctx.fillStyle = 'rgba(0,0,0,0.25)';
+          for (let i = 0; i < 3; i++) ctx.fillRect(-0.035, -0.02 + i * 0.022, 0.06 - i * 0.012, 0.006);
+          ctx.restore();
+        }
+        ctx.fillStyle = C.red;
+        ctx.beginPath();
+        ctx.arc(0.62, -0.6, 0.008, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       // Bureau
       ctx.fillStyle = '#1b1526';
@@ -244,6 +252,8 @@ export const chambre: Level = {
       ctx.globalAlpha = 1;
       ctx.fillStyle = '#2a2c3a';
       ctx.fillRect(-0.76, DESK - 0.005, 0.38, 0.012);
+      if (d.isHover('cyber')) glow(ctx, -0.57, DESK - 0.09, 0.22, '#ffffff', 0.18);
+      d.hot('cyber', { kind: 'rect', x: -0.76, y: DESK - 0.18, w: 0.38, h: 0.19 });
 
       // Clavier, souris, tasse
       fillRR(ctx, -0.2, DESK + 0.012, 0.4, 0.035, 0.008, '#15151f');
@@ -269,7 +279,7 @@ export const chambre: Level = {
       }
 
       // Manette
-      const padHot = d.isHover('manette');
+      const padHot = d.isHover('jeux');
       ctx.save();
       ctx.translate(0.5, DESK + 0.01);
       ctx.rotate(-0.12);
@@ -292,7 +302,7 @@ export const chambre: Level = {
       ctx.fillRect(-0.065, -0.002, 0.03, 0.009);
       ctx.fillRect(-0.054, -0.013, 0.009, 0.03);
       ctx.restore();
-      d.hot('manette', { kind: 'rect', x: 0.4, y: DESK - 0.06, w: 0.2, h: 0.12 });
+      d.hot('jeux', { kind: 'rect', x: 0.4, y: DESK - 0.06, w: 0.2, h: 0.12 });
 
       // Lampe de bureau
       ctx.strokeStyle = '#2a2a38';

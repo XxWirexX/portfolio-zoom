@@ -23,7 +23,15 @@
     </header>
 
     <div class="top-actions">
-      <button id="text-btn" class="pill" type="button">Version texte</button>
+      <button id="text-btn" class="pill" type="button">CV</button>
+      <a id="li-link" class="pill icon" href="#" target="_blank" rel="noopener" aria-label="LinkedIn">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M0 1.15C0 .52.52 0 1.18 0h13.64C15.48 0 16 .52 16 1.15v13.7c0 .63-.52 1.15-1.18 1.15H1.18C.52 16 0 15.48 0 14.85V1.15zM4.85 13.4V6.17H2.44v7.23h2.41zM3.65 5.18c.84 0 1.36-.56 1.36-1.25-.02-.71-.52-1.25-1.35-1.25-.82 0-1.36.54-1.36 1.25 0 .7.52 1.25 1.33 1.25h.02zM6.13 13.4h2.41V9.36c0-.21.02-.43.08-.58.17-.43.57-.88 1.24-.88.87 0 1.22.66 1.22 1.64v3.86h2.41V9.26c0-2.22-1.19-3.25-2.78-3.25-1.28 0-1.85.7-2.17 1.2v.03h-.02l.02-.03V6.17H6.13c.03.68 0 7.23 0 7.23z"
+          />
+        </svg>
+      </a>
       <a id="gh-link" class="pill icon" href="#" target="_blank" rel="noopener" aria-label="GitHub">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path
@@ -62,11 +70,18 @@
       <div class="links" id="panel-links"></div>
     </dialog>
 
-    <dialog id="text-version" class="panel wide" aria-labelledby="tv-title">
+    <dialog id="text-version" class="panel wide cv" aria-labelledby="tv-title">
       <button class="close" type="button" data-close aria-label="Fermer">×</button>
-      <h2 id="tv-title">Version texte</h2>
-      <p class="muted">Tout le contenu du site, sans le zoom. Clique sur un titre pour y aller en zoomant.</p>
+      <header class="cv-head">
+        <div>
+          <h2 id="tv-title">Kylian Gagnon</h2>
+          <p class="cv-role" id="cv-role"></p>
+        </div>
+        <button class="pill print-btn" type="button" id="print-btn">Télécharger en PDF</button>
+      </header>
+      <p class="cv-contact" id="cv-contact"></p>
       <div id="tv-content"></div>
+      <nav class="cv-floors" id="cv-floors" aria-label="Aller à un étage"></nav>
     </dialog>
 
     <noscript>
