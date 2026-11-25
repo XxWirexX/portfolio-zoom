@@ -58,10 +58,17 @@ export const projets: Level = {
     d.layer(0.9, (v) => {
       // grille de points
       if (!d.visible(0.08, 6)) return;
-      ctx.fillStyle = 'rgba(255,255,255,0.06)';
-      const z = 1.5 / px;
-      for (let x = Math.floor(v.x0 / 0.08) * 0.08; x < v.x1; x += 0.08)
-        for (let y = Math.floor(v.y0 / 0.08) * 0.08; y < v.y1; y += 0.08) ctx.fillRect(x, y, z, z);
+      const nx = (v.x1 - v.x0) / 0.08;
+      const ny = (v.y1 - v.y0) / 0.08;
+      if (nx * ny < 6000) {
+        // un seul chemin pour tous les points (bien plus rapide que des fillRect)
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        const z = 1.5 / px;
+        ctx.beginPath();
+        for (let x = Math.floor(v.x0 / 0.08) * 0.08; x < v.x1; x += 0.08)
+          for (let y = Math.floor(v.y0 / 0.08) * 0.08; y < v.y1; y += 0.08) ctx.rect(x, y, z, z);
+        ctx.fill();
+      }
       glow(ctx, -1.4, -1.0, 1.1, C.red, 0.08);
       glow(ctx, 1.5, 1.0, 1.1, C.blue, 0.1);
     });
