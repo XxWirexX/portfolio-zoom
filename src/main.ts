@@ -31,6 +31,7 @@ const params = new URLSearchParams(location.search);
 const fromHash = LEVELS.findIndex((l) => `#${l.key}` === location.hash);
 const start = params.has('t') ? Number(params.get('t')) : Math.max(0, fromHash);
 const cam = new Camera(start);
+cam.levelZoom = (t) => renderer.levelZoom(t);
 
 // Petite bulle quand on essaie de reculer avant l'espace
 const nudge = document.getElementById('nudge')!;
