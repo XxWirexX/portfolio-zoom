@@ -190,7 +190,7 @@ export class ZoomRenderer {
           0,
           1,
           { x: 0, y: 0 },
-          sub(view, x, y, s),
+          clampNested(sub(view, x, y, s)),
           cpx,
           next.opaqueNested !== false,
           time,
@@ -298,6 +298,16 @@ export class ZoomRenderer {
 function outerPortal(L: Level): { x: number; y: number; s: number } {
   const K = L.scale ?? 1;
   return { x: L.portal.x * K, y: L.portal.y * K, s: L.portal.s * K };
+}
+
+/**
+ * Un niveau imbriqué n'est visible qu'à travers son portail, jamais plus
+ * large que ±2,2 × ±1,6 de son repère (les portails font au plus 1,6 × 0,9
+ * ou un cercle de rayon ~1,1). Sans cette limite, un décor « infini »
+ * (grille, étoiles) serait calculé sur tout l'écran pour rien.
+ */
+function clampNested(v: Rect): Rect {
+  return { x0: Math.max(v.x0, -2.2), x1: Math.min(v.x1, 2.2), y0: Math.max(v.y0, -1.6), y1: Math.min(v.y1, 1.6) };
 }
 
 function sub(v: Rect, x: number, y: number, s: number): Rect {
