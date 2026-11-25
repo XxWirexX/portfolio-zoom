@@ -17,17 +17,16 @@ interface Unit {
   special?: boolean;
 }
 const UNITS: Unit[] = [
-  { name: 'switch', h: 0.09 },
   { name: 'traefik', h: 0.1, note: 'reverse proxy' },
-  { name: 'auth', h: 0.1, note: 'TOTP · passkeys' },
-  { name: 'dle-community', h: 0.15, note: 'Next.js' },
+  { name: 'portier', h: 0.1, note: 'auth · TOTP · passkeys' },
+  { name: 'admin', h: 0.1, note: 'panel + agent' },
+  { name: 'hub', h: 0.1, note: 'liste des sites' },
+  { name: 'dle-community', h: 0.1, note: 'Next.js' },
+  { name: 'zeste', h: 0.1, note: 'Express' },
   { name: 'postgres', h: 0.1, note: 'données' },
-  { name: 'kyara-bot', h: 0.1, note: 'agent IA' },
-  { name: 'genshin-build', h: 0.1 },
-  { name: 'panel', h: 0.1, note: 'admin' },
   { name: 'portfolio-zoom', h: 0.22, special: true },
-  { name: 'backups', h: 0.1, note: '→ OVH S3' },
-];
+  { name: 'backups', h: 0.1, note: '→ OVH' },
+]
 const UNIT_Y: number[] = [];
 {
   let y = RACK.y + 0.06;
@@ -257,10 +256,10 @@ export const serveur: Level = {
       fillRR(ctx, cx + 0.02, cy + 0.02, 0.62, 0.46, 0.01, '#05060c');
       const lines: [string, string][] = [
         ['$', 'cat contact.txt'],
+        ['mail', 'kylian.gagnon@free.fr'],
         ['github', 'XxWirexX'],
+        ['linkedin', 'kylian-gagnon'],
         ['web', 'wireredblue.xyz'],
-        ['statut', 'ouvert à une alternance'],
-        ['', "en école d'ingé"],
       ];
       lines.forEach(([k, v], i) => {
         const y = cy + 0.09 + i * 0.065;

@@ -54,10 +54,10 @@ const FETCH: [string, string][] = [
   ['OS', 'NixOS'],
   ['WM', 'Hyprland'],
   ['Shell', 'Impasto (Quickshell)'],
-  ['Langs', 'C# · TypeScript · Java'],
-  ['Front', 'Angular · Next.js'],
-  ['Back', '.NET · Spring · Prisma'],
-  ['Infra', 'Docker · Traefik · CI'],
+  ['Langs', 'TS · Java · SQL'],
+  ['Front', 'Angular · Next · Vue'],
+  ['Back', 'Spring · Symfony · Node'],
+  ['Infra', 'Docker · Linux · VPS'],
   ['Jeux', 'Godot'],
 ];
 
@@ -81,27 +81,27 @@ function snowflake(ctx: CanvasRenderingContext2D, x: number, y: number, r: numbe
 
 // ---- éditeur ----
 const CODE = [
-  'namespace MonApp.ViewModels;',
-  '',
-  'public partial class TableauDeBordViewModel : ObservableObject',
-  '{',
-  '    private readonly IDonneesService _service;',
-  '',
-  '    [ObservableProperty]',
-  '    private ObservableCollection<Element> _elements = new();',
-  '',
-  '    [RelayCommand]',
-  '    private async Task ChargerAsync()',
-  '    {',
-  '        var resultat = await _service.GetElementsAsync();',
-  '        Elements = new(resultat);',
-  '    }',
+  '// Zoom exponentiel autour du point fixe F',
+  'export function camera(t: number, level: Level) {',
+  '  const n = Math.floor(t);',
+  '  const p = t - n;',
+  '  const { x, y, s } = level.portal;',
+  '  const h = Math.pow(s, p);',
+  '  const F = { x: x / (1 - s), y: y / (1 - s) };',
+  '  return { n, p, h, F };',
   '}',
+  '',
+  '// Chaque niveau dessine le suivant dans son portail',
+  'level.draw({ ...d, portal: () => drawLevel(n + 1) });',
 ];
-const KW = new Set(['namespace', 'public', 'partial', 'class', 'private', 'readonly', 'async', 'var', 'await', 'new']);
+const KW = new Set(['export', 'function', 'const', 'return', 'number']);
 
 function codeLine(ctx: CanvasRenderingContext2D, line: string, x: number, y: number, size: number) {
   const charW = size * 0.6;
+  if (line.trim().startsWith('//')) {
+    text(ctx, line, x, y, size, '#6f7699', { font: MONO, weight: 400 });
+    return;
+  }
   const tokens = line.match(/(\s+|\[[A-Za-z]+\]|[A-Za-z_][A-Za-z0-9_]*|.)/g) ?? [];
   let cx = x;
   for (const tk of tokens) {
@@ -116,7 +116,7 @@ function codeLine(ctx: CanvasRenderingContext2D, line: string, x: number, y: num
   }
 }
 
-const FOLDERS = ['dle-community', 'intrasso', 'kyara-bot', 'impasto', 'vps-infra', 'portfolio-zoom'];
+const FOLDERS = ['dle', 'intrasso', 'party-app', 'nixos-config', 'vps-infra', 'portfolio-zoom'];
 const BLOBS = (() => {
   const r = rng(61);
   return Array.from({ length: 5 }, (_, i) => ({ x: (r() * 2 - 1) * 1.6, y: (r() * 2 - 1) * 0.9, r: 0.5 + r() * 0.6, c: i % 2 ? C.blue : C.red }));
@@ -235,10 +235,10 @@ export const bureau: Level = {
       const ey = -0.76;
       const ew = 2.03;
       const eh = 0.78;
-      windowFrame(ctx, ex, ey, ew, eh, 'nvim — TableauDeBordViewModel.cs', false, px);
+      windowFrame(ctx, ex, ey, ew, eh, 'nvim — src/engine/zoom.ts', false, px);
       if (d.visible(0.02, 2.5) && inView(view, ex, ey, ew, eh)) {
-        fillRR(ctx, ex + 0.02, ey + 0.065, 0.42, 0.04, 0.008, 'rgba(255,255,255,0.06)');
-        text(ctx, 'TableauDeBordViewModel.cs', ex + 0.035, ey + 0.093, 0.02, '#ffffff', { font: MONO });
+        fillRR(ctx, ex + 0.02, ey + 0.065, 0.16, 0.04, 0.008, 'rgba(255,255,255,0.06)');
+        text(ctx, 'zoom.ts', ex + 0.035, ey + 0.093, 0.02, '#ffffff', { font: MONO });
         CODE.forEach((line, i) => {
           const y = ey + 0.15 + i * 0.038;
           if (y > ey + eh - 0.02) return;
@@ -248,10 +248,10 @@ export const bureau: Level = {
         // curseur
         if (Math.sin(time * 5) > 0) {
           ctx.fillStyle = C.red;
-          ctx.fillRect(ex + 0.1 + 26 * 0.0132, ey + 0.15 + 13 * 0.038 - 0.02, 0.012, 0.026);
+          ctx.fillRect(ex + 0.1 + 53 * 0.0132, ey + 0.15 + 11 * 0.038 - 0.02, 0.012, 0.026);
         }
       }
-      d.hot('editeur', { kind: 'rect', x: ex, y: ey, w: ew, h: eh });
+      d.hot('site', { kind: 'rect', x: ex, y: ey, w: ew, h: eh });
 
       // ---- Gestionnaire de fichiers ----
       const fx = -0.47;
@@ -283,7 +283,7 @@ export const bureau: Level = {
       ctx.strokeStyle = 'rgba(255,255,255,0.18)';
       ctx.lineWidth = 1 / px;
       ctx.strokeRect(PX - PW, PY - PH, PW * 2, PH * 2);
-      text(ctx, '~/projets · 9 éléments', PX - PW, PY + PH + 0.045, 0.02, 'rgba(220,226,255,0.5)', { font: MONO });
+      text(ctx, '~/projets · 8 éléments', PX - PW, PY + PH + 0.045, 0.02, 'rgba(220,226,255,0.5)', { font: MONO });
     });
   },
 };

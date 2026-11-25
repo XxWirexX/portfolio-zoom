@@ -13,19 +13,29 @@ const GAP = 0.06;
 const X0 = -1.56;
 const Y0 = -0.72;
 
-/** Ordre des cartes (ligne par ligne). `null` = la carte infra (portail). */
-const GRID: (string | null)[] = ['dle', 'intrasso', 'kyarabot', 'impasto', null, 'auth', 'genshin', 'hikuze', 'lucca'];
+/** Les cartes : colonne, ligne et largeur (en cases). `null` = la carte infra (portail). */
+const CARDS: { id: string | null; col: number; row: number; span?: number }[] = [
+  { id: 'dle', col: 0, row: 0, span: 2 },
+  { id: 'intrasso', col: 2, row: 0 },
+  { id: 'lucca', col: 0, row: 1 },
+  { id: null, col: 1, row: 1 },
+  { id: 'auth', col: 2, row: 1 },
+  { id: 'zeste', col: 0, row: 2 },
+  { id: 'panel', col: 1, row: 2 },
+  { id: 'github', col: 2, row: 2 },
+];
 
 const STATUS: Record<string, [string, string]> = {
   dle: ['en ligne', '#3dd68c'],
   intrasso: ['en cours', '#ffcb6b'],
-  kyarabot: ['expérience', C.cyan],
-  impasto: ['public', '#c3a6ff'],
-  auth: ['en ligne', '#3dd68c'],
-  genshin: ['en ligne', '#3dd68c'],
-  hikuze: ['idée', '#ff9a6b'],
   lucca: ['pro · Axopen', C.blueSoft],
+  auth: ['en ligne', '#3dd68c'],
+  zeste: ['en ligne', '#3dd68c'],
+  panel: ['en service', '#3dd68c'],
 };
+
+/** Mini-grille façon Wordle, pour illustrer la carte DLE. */
+const DLE_ROWS = ['gyxgg', 'xgyxg', 'ggggg'];
 
 const S = 0.15;
 const PW = 1.6 * S;
@@ -71,11 +81,10 @@ export const projets: Level = {
         cx += w + 0.02;
       }
 
-      GRID.forEach((id, i) => {
-        const col = i % 3;
-        const row = Math.floor(i / 3);
+      CARDS.forEach(({ id, col, row, span = 1 }) => {
         const x = X0 + col * (CARD_W + GAP);
         const y = Y0 + row * (CARD_H + GAP);
+        const W = CARD_W * span + GAP * (span - 1);
 
         if (id === null) {
           // Carte infra
@@ -107,42 +116,76 @@ export const projets: Level = {
           return;
         }
 
-        if (!inView(view, x, y, CARD_W, CARD_H)) return;
+        if (!inView(view, x, y, W, CARD_H)) return;
         const sp = spots[id];
+        if (id === 'github') {
+          const hov = d.isHover(id);
+          ctx.save();
+          ctx.setLineDash([0.02, 0.014]);
+          ctx.strokeStyle = hov ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)';
+          ctx.lineWidth = Math.max(1.2 / px, 0.003);
+          ctx.beginPath();
+          ctx.roundRect(x, y, W, CARD_H, 0.03);
+          ctx.stroke();
+          ctx.restore();
+          if (d.visible(0.03, 3)) {
+            text(ctx, sp.title, x + W / 2, y + CARD_H / 2 - 0.01, 0.05, '#ffffff', { align: 'center', weight: 700 });
+            text(ctx, 'github.com/XxWirexX  →', x + W / 2, y + CARD_H / 2 + 0.06, 0.024, 'rgba(220,226,255,0.7)', {
+              align: 'center',
+              font: FONT.mono,
+            });
+          }
+          d.hot(id, { kind: 'rect', x, y, w: W, h: CARD_H });
+          return;
+        }
         const hov = d.isHover(id);
         const lift = hov ? -0.012 : 0;
-        if (hov) glow(ctx, x + CARD_W / 2, y + CARD_H / 2, 0.7, C.blue, 0.18);
-        fillRR(ctx, x, y + lift, CARD_W, CARD_H, 0.03, hov ? '#181c2e' : '#121522');
+        if (hov) glow(ctx, x + W / 2, y + CARD_H / 2, 0.7, C.blue, 0.18);
+        fillRR(ctx, x, y + lift, W, CARD_H, 0.03, hov ? '#181c2e' : '#121522');
         ctx.strokeStyle = hov ? rgba('#ffffff', 0.35) : 'rgba(255,255,255,0.08)';
         ctx.lineWidth = Math.max(1 / px, 0.002);
         ctx.beginPath();
-        ctx.roundRect(x, y + lift, CARD_W, CARD_H, 0.03);
+        ctx.roundRect(x, y + lift, W, CARD_H, 0.03);
         ctx.stroke();
         // bande colorée
         fillRR(ctx, x, y + lift + 0.04, 0.008, CARD_H - 0.08, 0.004, col === 0 ? C.red : col === 2 ? C.blue : '#c3a6ff');
 
         if (!d.visible(0.03, 3)) {
-          d.hot(id, { kind: 'rect', x, y, w: CARD_W, h: CARD_H });
+          d.hot(id, { kind: 'rect', x, y, w: W, h: CARD_H });
           return;
         }
         const [st, stc] = STATUS[id] ?? ['', '#fff'];
         const sw = textWidth(ctx, st, 0.02, FONT.mono) + 0.06;
-        fillRR(ctx, x + CARD_W - sw - 0.04, y + lift + 0.045, sw, 0.045, 0.0225, rgba(stc, 0.14));
+        fillRR(ctx, x + W - sw - 0.04, y + lift + 0.045, sw, 0.045, 0.0225, rgba(stc, 0.14));
         ctx.fillStyle = stc;
         ctx.beginPath();
-        ctx.arc(x + CARD_W - sw - 0.015, y + lift + 0.0675, 0.008, 0, Math.PI * 2);
+        ctx.arc(x + W - sw - 0.015, y + lift + 0.0675, 0.008, 0, Math.PI * 2);
         ctx.fill();
-        text(ctx, st, x + CARD_W - sw - 0.0, y + lift + 0.075, 0.02, stc, { font: FONT.mono });
+        text(ctx, st, x + W - sw - 0.0, y + lift + 0.075, 0.02, stc, { font: FONT.mono });
 
-        text(ctx, sp.title, x + 0.05, y + lift + 0.15, 0.05, '#ffffff', { weight: 700, maxW: CARD_W - 0.1 });
-        text(ctx, sp.hint, x + 0.05, y + lift + 0.2, 0.024, 'rgba(220,226,255,0.6)', { font: FONT.mono, maxW: CARD_W - 0.1 });
+        text(ctx, sp.title, x + 0.05, y + lift + 0.15, 0.05, '#ffffff', { weight: 700, maxW: W - 0.1 });
+        text(ctx, sp.hint, x + 0.05, y + lift + 0.2, 0.024, 'rgba(220,226,255,0.6)', { font: FONT.mono, maxW: W - 0.1 });
+
+        if (span > 1) {
+          // aperçu façon Wordle + lien
+          const cs = 0.055;
+          const gx = x + W - 5 * (cs + 0.01) - 0.05;
+          const gy = y + lift + 0.13;
+          DLE_ROWS.forEach((r, ri) =>
+            [...r].forEach((c, ci) => {
+              const col = c === 'g' ? '#3dd68c' : c === 'y' ? '#ffcb6b' : 'rgba(255,255,255,0.12)';
+              fillRR(ctx, gx + ci * (cs + 0.01), gy + ri * (cs + 0.01), cs, cs, 0.01, col);
+            }),
+          );
+          text(ctx, 'dle.wireredblue.xyz ↗', x + 0.05, y + lift + 0.255, 0.024, C.blueSoft, { font: FONT.mono, weight: 600 });
+        }
 
         // tags
         let tx = x + 0.05;
-        let ty = y + lift + 0.3;
-        for (const tag of (sp.tags ?? []).slice(0, 5)) {
+        let ty = y + lift + (span > 1 ? 0.33 : 0.3);
+        for (const tag of (sp.tags ?? []).slice(0, span > 1 ? 8 : 5)) {
           const w = textWidth(ctx, tag, 0.02, FONT.mono) + 0.035;
-          if (tx + w > x + CARD_W - 0.04) {
+          if (tx + w > x + W - 0.04) {
             tx = x + 0.05;
             ty += 0.058;
             if (ty > y + CARD_H - 0.05) break;
@@ -151,7 +194,7 @@ export const projets: Level = {
           text(ctx, tag, tx + w / 2, ty + 0.03, 0.02, 'rgba(230,234,255,0.85)', { align: 'center', font: FONT.mono });
           tx += w + 0.015;
         }
-        d.hot(id, { kind: 'rect', x, y, w: CARD_W, h: CARD_H });
+        d.hot(id, { kind: 'rect', x, y, w: W, h: CARD_H });
       });
     });
   },

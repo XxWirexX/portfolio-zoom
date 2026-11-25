@@ -13,7 +13,7 @@ import './style.css';
 import { Camera, bindInput } from './engine/camera';
 import { ZoomRenderer, devicePixelRatioClamp } from './engine/zoom';
 import { LEVELS } from './levels';
-import { levels as texts, site, spots } from './content';
+import { cv, levels as texts, site, spots } from './content';
 
 const canvas = document.getElementById('scene') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d', { alpha: false })!;
@@ -40,6 +40,7 @@ const tooltip = $('tooltip');
 const panel = $<HTMLDialogElement>('panel');
 const textVersion = $<HTMLDialogElement>('text-version');
 ($<HTMLAnchorElement>('gh-link')).href = site.github;
+($<HTMLAnchorElement>('li-link')).href = site.linkedin;
 
 // Légende repliable (mémorisé dans le navigateur quand c'est possible)
 const capToggle = $<HTMLButtonElement>('cap-toggle');
@@ -99,6 +100,21 @@ function hideHint() {
   hint.classList.add('gone');
 }
 
+/** Paragraphe avec **gras**, échappé. */
+function para(p: string): string {
+  return `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`;
+}
+function tagList(tags?: string[]): string {
+  return tags?.length ? `<ul class="tags">${tags.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+}
+function groupsHtml(groups?: { label: string; tags: string[] }[]): string {
+  return (groups ?? []).map((g) => `<p class="group-label">${esc(g.label)}</p>${tagList(g.tags)}`).join('');
+}
+function linksHtml(links?: { label: string; href: string }[]): string {
+  const l = (links ?? []).map((x) => `<a href="${esc(x.href)}" target="_blank" rel="noopener">${esc(x.label)} ↗</a>`).join('');
+  return l ? `<div class="links">${l}</div>` : '';
+}
+
 function openSpot(id: string) {
   const sp = spots[id];
   if (!sp) return;
@@ -106,38 +122,51 @@ function openSpot(id: string) {
   $('panel-kicker').textContent = lvl >= 0 ? texts[lvl].kicker : '';
   $('panel-title').textContent = sp.title;
   $('panel-tags').innerHTML = (sp.tags ?? []).map((t) => `<li>${esc(t)}</li>`).join('');
-  $('panel-body').innerHTML = sp.body.map((p) => `<p>${esc(p)}</p>`).join('');
-  $('panel-links').innerHTML = (sp.links ?? [])
-    .map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`)
-    .join('');
+  $('panel-body').innerHTML = sp.body.map(para).join('') + groupsHtml(sp.groups);
+  $('panel-links').innerHTML = linksHtml(sp.links).replace(/^<div class="links">|<\/div>$/g, '');
   tooltip.classList.remove('show');
   panel.showModal();
 }
 
+/** Le CV : construit à partir des spots, dans l'ordre de `cv` (content.ts). */
 function buildTextVersion() {
-  const html = texts
-    .map((t, i) => {
-      const items = t.spots
-        .map((id) => {
-          const sp = spots[id];
-          if (!sp) return '';
-          const tags = sp.tags?.length ? `<ul class="tags">${sp.tags.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
-          const links = (sp.links ?? [])
-            .map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`)
-            .join('');
-          return `<h4>${esc(sp.title)}</h4>${sp.body.map((p) => `<p>${esc(p)}</p>`).join('')}${tags}${links ? `<div class="links">${links}</div>` : ''}`;
-        })
-        .join('');
-      return `<h3><button type="button" data-go="${i}">${esc(t.kicker)} — ${esc(t.title)}</button></h3><p>${esc(t.body)}</p>${items}`;
-    })
+  $('cv-role').textContent = `${site.role} · Lyon`;
+  $('cv-contact').innerHTML = [
+    `<a href="mailto:${esc(site.email)}">${esc(site.email)}</a>`,
+    `<a href="${esc(site.github)}" target="_blank" rel="noopener">github.com/XxWirexX</a>`,
+    `<a href="${esc(site.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>`,
+    `<a href="https://${site.domain}">${site.domain}</a>`,
+  ].join(' · ');
+  $('tv-content').innerHTML = cv
+    .map(
+      (sec) =>
+        `<h3>${esc(sec.title)}</h3>` +
+        sec.spots
+          .map((id) => {
+            const sp = spots[id];
+            if (!sp) return '';
+            const head = sec.title === 'Compétences' ? '' : `<h4>${esc(sp.title)}<small>${esc(sp.hint)}</small></h4>`;
+            // À l'impression, on ne garde que l'essentiel (classe .more masquée).
+            const body = sp.body
+              .map((p, k) => (k > 0 && id !== 'axopen' ? para(p).replace('<p>', '<p class="more">') : para(p)))
+              .join('');
+            return head + body + groupsHtml(sp.groups) + tagList(sp.tags) + linksHtml(sp.links);
+          })
+          .join(''),
+    )
     .join('');
-  $('tv-content').innerHTML = html;
-  $('tv-content').querySelectorAll<HTMLButtonElement>('[data-go]').forEach((b) =>
+  const floors = $('cv-floors');
+  floors.innerHTML = '<p class="muted">Ou explore le site étage par étage :</p>';
+  texts.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = `${String(i).padStart(2, '0')} · ${t.nav}`;
     b.addEventListener('click', () => {
       textVersion.close();
-      travelTo(Number(b.dataset.go));
-    }),
-  );
+      travelTo(i);
+    });
+    floors.appendChild(b);
+  });
 }
 buildTextVersion();
 $('text-btn').addEventListener('click', () => textVersion.showModal());
