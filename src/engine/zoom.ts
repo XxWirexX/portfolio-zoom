@@ -45,11 +45,6 @@ export class ZoomRenderer {
     return this.levels.length;
   }
 
-  /** ln(facteur de zoom) entre le niveau à la position t et le suivant. */
-  levelZoom(t: number): number {
-    return Math.log(1 / outerPortal(this.levels[this.mod(Math.floor(t))]).s);
-  }
-
   mod(i: number): number {
     const n = this.levels.length;
     return ((i % n) + n) % n;

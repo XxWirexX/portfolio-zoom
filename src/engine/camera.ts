@@ -1,24 +1,16 @@
 /**
  * La caméra : un seul nombre `t` (1 unité = 1 niveau) qui suit une cible
  * `target` avec un amorti exponentiel. Les entrées (molette, doigt, clavier)
- * ne font que déplacer la cible.
- *
- * Zoom libre : on s'arrête où on veut. Seul un petit « aimant » cale la vue
- * sur un étage quand on s'arrête tout près (pour lire la légende).
- * Les entrées sont exprimées en zoom visuel (`zoomBy`) : un cran de molette
- * grossit toujours autant l'image, quel que soit l'écart entre deux étages.
+ * ne font que déplacer la cible ; après un moment sans action, la cible se
+ * cale sur le niveau entier le plus proche pour que chaque étage soit bien cadré.
  */
 export class Camera {
   t: number;
   target: number;
   /** Vitesse de rattrapage (plus grand = plus nerveux). */
-  stiffness = 6;
+  stiffness = 4.2;
   private lastInput = 0;
-  private snapDelay = 700;
-  /** Distance (en niveaux) sous laquelle l'aimant cale la vue sur un étage. */
-  magnet = 0.06;
-  /** ln(facteur de zoom) du niveau à la position t (fourni par le moteur). */
-  levelZoom: (t: number) => number = () => Math.log(10);
+  private snapDelay = 650;
   private auto: { to: number } | null = null;
   /**
    * Pas de retour avant l'espace : la boucle n'existe que vers l'avant, pour ne
@@ -47,14 +39,6 @@ export class Camera {
     this.lastInput = performance.now();
   }
 
-  /**
-   * Zoom visuel : `k` = ln(grossissement). k = 0,22 ≈ ×1,25.
-   * Converti en niveaux selon l'écart de zoom du niveau courant.
-   */
-  zoomBy(k: number): void {
-    this.nudge(k / this.levelZoom(this.target));
-  }
-
   /** Aller au niveau entier `to` (navigation, clavier). */
   goTo(to: number): void {
     if (to < this.min) {
@@ -69,8 +53,7 @@ export class Camera {
   step(dt: number, reduced: boolean): void {
     const now = performance.now();
     if (!this.auto && now - this.lastInput > this.snapDelay) {
-      const r = Math.round(this.target);
-      if (Math.abs(this.target - r) < this.magnet) this.target = r;
+      this.target = Math.round(this.target);
     }
     // Navigation longue (plusieurs niveaux) : vitesse plafonnée pour profiter du voyage.
     const k = reduced ? 9 : this.stiffness;
@@ -117,8 +100,7 @@ export function bindInput(el: HTMLElement, cam: Camera, h: InputHandlers, levelC
       const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 600 : 1;
       const dy = Math.max(-240, Math.min(240, e.deltaY * unit));
       // Molette vers le haut = zoomer (comme sur une carte), à l'inverse d'une page.
-      // 100 px de molette (≈ un cran) ≈ ×1,4.
-      cam.zoomBy(-dy * 0.0033);
+      cam.nudge(-dy * 0.0019);
     },
     { passive: false },
   );
@@ -152,7 +134,7 @@ export function bindInput(el: HTMLElement, cam: Camera, h: InputHandlers, levelC
     if (pts.size === 2) {
       const [a, b] = [...pts.values()];
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
-      if (pinchDist > 0) cam.zoomBy(Math.log(dist / pinchDist) * 1.6);
+      if (pinchDist > 0) cam.nudge(Math.log(dist / pinchDist) * 0.9);
       pinchDist = dist;
       firstInput();
       return;
@@ -161,7 +143,7 @@ export function bindInput(el: HTMLElement, cam: Camera, h: InputHandlers, levelC
     if (dragged) {
       firstInput();
       // Même sens que la molette : tirer vers le bas = plonger.
-      cam.zoomBy((e.clientY - prev.y) * 0.006);
+      cam.nudge((e.clientY - prev.y) * 0.0042);
     }
   });
 
