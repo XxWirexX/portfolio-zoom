@@ -170,7 +170,6 @@ function buildTextVersion() {
 }
 buildTextVersion();
 $('text-btn').addEventListener('click', () => textVersion.showModal());
-$('print-btn').addEventListener('click', () => window.print());
 
 for (const dlg of [panel, textVersion]) {
   dlg.addEventListener('click', (e) => {
