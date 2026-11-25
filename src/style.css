@@ -284,7 +284,7 @@ body {
 .mouse i {
   position: absolute;
   left: 50%;
-  top: 6px;
+  top: 4px;
   width: 3px;
   height: 6px;
   margin-left: -1.5px;
@@ -294,11 +294,11 @@ body {
 }
 @keyframes wheel {
   0% {
-    transform: translateY(0);
+    transform: translateY(9px);
     opacity: 1;
   }
   70% {
-    transform: translateY(9px);
+    transform: translateY(0);
     opacity: 0;
   }
   100% {
@@ -317,6 +317,49 @@ body {
   }
   .mouse {
     display: none;
+  }
+}
+
+/* ---------- « C'est le début » (non cliquable) ---------- */
+.nudge {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  transform: translate(-50%, -50%) translateY(8px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(10, 12, 22, 0.7);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font: 500 13px var(--sans);
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s, transform 0.35s;
+}
+.nudge.show {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+.nudge .arrow {
+  display: inline-block;
+  margin-right: 4px;
+  color: var(--blue);
+  animation: nudge-up 1s ease-in-out infinite;
+}
+@keyframes nudge-up {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@media (max-width: 640px) {
+  .nudge {
+    white-space: normal;
+    width: calc(100vw - 48px);
+    text-align: center;
   }
 }
 

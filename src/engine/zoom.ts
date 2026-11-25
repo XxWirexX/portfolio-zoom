@@ -36,6 +36,8 @@ interface Hot {
 export class ZoomRenderer {
   hover: string | null = null;
   private hots: Hot[] = [];
+  /** Position écran des pastilles (pour qu'elles soient cliquables elles aussi). */
+  private markers: { id: string; x: number; y: number }[] = [];
 
   constructor(public levels: Level[]) {}
 
@@ -216,6 +218,9 @@ export class ZoomRenderer {
 
   /** Quelle zone cliquable se trouve sous ce point (pixels du canvas) ? */
   hitTest(px: number, py: number): string | null {
+    // La pastille compte comme la zone, même si elle déborde un peu.
+    const r = 16 * devicePixelRatioClamp();
+    for (const mk of this.markers) if ((mk.x - px) ** 2 + (mk.y - py) ** 2 <= r * r) return mk.id;
     for (let i = this.hots.length - 1; i >= 0; i--) {
       const hs = this.hots[i];
       const q = hs.m.inverse().transformPoint(new DOMPoint(px, py));
@@ -232,6 +237,7 @@ export class ZoomRenderer {
   /** Petits repères pulsants qui signalent ce qui est cliquable. */
   private drawHotMarkers(ctx: CanvasRenderingContext2D, time: number): void {
     const seen = new Set<string>();
+    this.markers = [];
     for (const hs of this.hots) {
       if (seen.has(hs.id)) continue;
       seen.add(hs.id);
@@ -241,6 +247,16 @@ export class ZoomRenderer {
       const sizePx = (sh.kind === 'rect' ? Math.max(sh.w, sh.h) : sh.r * 2) * sc;
       if (sizePx < 14) continue;
       const hovered = this.hover === hs.id;
+      // pastille : légèrement à l'intérieur du coin haut-droit
+      let corner: DOMPoint;
+      if (sh.kind === 'rect') {
+        const inset = Math.min(Math.min(sh.w, sh.h) * 0.12, 18 / sc);
+        corner = new DOMPoint(sh.x + sh.w - inset, sh.y + inset);
+      } else {
+        corner = new DOMPoint(sh.x + sh.r * 0.6, sh.y - sh.r * 0.6);
+      }
+      const c = m.transformPoint(corner);
+      this.markers.push({ id: hs.id, x: c.x, y: c.y });
 
       ctx.save();
       if (hovered) {
@@ -260,10 +276,6 @@ export class ZoomRenderer {
         ctx.strokeStyle = 'rgba(255,255,255,0.85)';
         ctx.stroke();
       } else {
-        // point pulsant au coin haut-droit de la zone
-        const corner =
-          sh.kind === 'rect' ? new DOMPoint(sh.x + sh.w, sh.y) : new DOMPoint(sh.x + sh.r * 0.72, sh.y - sh.r * 0.72);
-        const c = m.transformPoint(corner);
         const k = devicePixelRatioClamp();
         const ph = (time * 1.4 + hashId(hs.id)) % 1;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
